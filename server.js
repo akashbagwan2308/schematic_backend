@@ -86,7 +86,15 @@ app.post('/api/synthesize', authenticateToken, (req, res) => {
     try {
         fs.writeFileSync(vFile, verilogCode);
 
-        const yosysCommand = `yosys -p "read_verilog -sv ${vFile}; proc; opt; write_json ${jsonFile}"`;
+        const yosysCommand = `
+		yosys -p "
+		read_verilog -sv ${vFile};
+		hierarchy -auto-top;
+		proc;
+		opt;
+		write_json ${jsonFile};
+		"
+	`;
 
         exec(yosysCommand, { timeout: 10000 }, (error, stdout, stderr) => {
             if (fs.existsSync(vFile)) fs.unlinkSync(vFile);
